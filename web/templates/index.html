@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='csstest.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <title>洞察者计划</title>
+</head>
+<body>
+    <h1>欢迎访问洞察者计划</h1>
+    <div class="photo">
+    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="image" width="800" height="600">
+    </div>
+
+    <div class="login">
+    <a href="http://192.168.31.26:1024/login"  >登录</a>
+    </div>
+</body>
+</html>

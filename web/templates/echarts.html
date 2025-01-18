@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="{{ url_for('static', filename='echarts.min.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='other.css') }}">
+    <title>数据表格</title>
+</head>
+<body>
+    <h1>欢迎使用表格<h1>
+            <!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+    <div id="main" style="width: 1080;height:720;"></div>
+
+    <div id="lastdata" style="width: 1080;height:720;"></div>
+
+    <script src="{{ url_for('static', filename='myechart.js') }}"></script>
+</body>
+</html>

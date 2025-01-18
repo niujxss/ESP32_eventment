@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='csstest.css') }}">
+    <title>洞察者计划数据观察</title>
+</head>
+<body>
+    <h1>动态数据实时监测</h1>
+    <table  border="1">
+        <thead>
+            <tr>
+                <th>类型</th>
+                <th>数据</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>温度</td>
+                <td id="temp">{{w}}</td>
+            </tr>
+            <tr>
+                <td>湿度</td>
+                <td id="shidu">{{h}}</td>
+            </tr>
+            <tr>
+                <td>时间</td>
+                <td id="time">{{t}}</td>
+            </tr>
+            <tr>
+                <td>日期</td>
+                <td id="date">{{d}}</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <button id="shuaxin">刷新</button>
+
+    <script src="{{ url_for('static', filename='lastdata.js') }}"></script>
+</body>
+</html>

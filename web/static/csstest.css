@@ -1,0 +1,44 @@
+/* 标签选择器 */
+h1 {
+    color: yellow;
+    text-align: center;
+}
+
+.photo {
+    text-align: center;
+}
+
+
+/* 伪类 */
+a:hover {
+    color: red;
+}
+
+body {
+    background-color: gray; /* 设置页面背景颜色为浅蓝色 */
+}
+
+.login {
+    font-size: 20px;
+    text-align:right;
+    color: blueviolet;
+}
+
+th {
+    font-size: 40px;
+    text-align:center;
+    color: blueviolet;
+
+}
+
+td {
+    font-size: 40px;
+    text-align:center;
+    color: rgb(226, 153, 43); 
+
+    
+}
+
+table  {
+    width: 100%;
+}
