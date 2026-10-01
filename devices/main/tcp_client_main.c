@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include "driver/gpio.h"
 #include "MyI2C.h"
+#include "esp_err.h"
 #include <string.h>
 
 
@@ -66,12 +67,34 @@ void vTaskData( void * pvParameters )
         float temp = 0.f;
         float hum = 0.f;
 
-        my_read_data(buffer);
+        // 读失败时 buffer 不会被改写，先填哨兵值，避免旧数据冒充新数据
+        memset(buffer,0xFF,sizeof(buffer));
+
+        esp_err_t i2c_err = my_read_data(buffer);
+        if(i2c_err != ESP_OK)
+        {
+            printf("i2c read fail: %s (0x%x)\n",esp_err_to_name(i2c_err),i2c_err);
+            my_reset();                             // 主动软复位，不等它自己恢复
+            vTaskDelay(1000 / portTICK_PERIOD_MS);  // 原来的 continue 没有延时，会退化成1秒空转
+            continue;
+        }
+
+        // CRC 校验：buffer[2] 为温度校验字节，buffer[5] 为湿度校验字节
+        if(my_crc8(buffer,2) != buffer[2] || my_crc8(buffer+3,2) != buffer[5])
+        {
+            printf("crc fail: raw=%02X%02X %02X%02X\n",buffer[0],buffer[1],buffer[3],buffer[4]);
+            my_reset();
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            continue;
+        }
+
         recovery_temper = ((uint16_t)buffer[0]<<8)|buffer[1];
         temp = -45 + 175*((float)recovery_temper/65535);
 
         if(temp < -40.f)
         {
+            printf("temp out of range: raw=%d\n",recovery_temper);
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
             continue;
         }
  

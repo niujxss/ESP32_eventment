@@ -1,4 +1,79 @@
-# This file was generated using idf.py save-defconfig. It can be edited manually.
-# Espressif IoT Development Framework (ESP-IDF) Project Minimal Configuration
+# ----------------------------------------------------------------------------
+#  ESP32-C3 + SHT41 temperature/humidity sensor - project default config
+# ----------------------------------------------------------------------------
+#  This file is the hand-written source of configuration and IS committed.
+#  The sdkconfig in the project root is a generated artifact: keep it local,
+#  do NOT commit it (it holds the WiFi credentials).
 #
-# CONFIG_UNITY_ENABLE_IDF_TEST_RUNNER is not set
+#  NOTE: defaults only apply to options that are NOT already present in
+#  sdkconfig. Once an option is written into sdkconfig, editing it here has
+#  no effect. To make a change take effect, delete sdkconfig (or that single
+#  option) and rebuild.
+#
+#  CAUTION: keep this file ASCII-only, and do not draw separator lines with
+#  '=' characters. kconfgen reads this file with open(name, "r") and no
+#  encoding argument, so non-ASCII comments crash the build with
+#  UnicodeDecodeError on a GBK-locale Windows machine; and '#' lines made of
+#  '=' are misread as empty assignments and echo "line was updated to ...".
+#
+#  Optional: sdkconfig.defaults.<target> (e.g. sdkconfig.defaults.esp32c3) is
+#  loaded automatically right after this file.
+# ----------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------
+# Target chip
+# ----------------------------------------------------------------------------
+# Must be set here. IDF looks for the target in sdkconfig first, then in
+# sdkconfig.defaults, and only falls back to a hard-coded "esp32" if neither
+# has it. Without this line, deleting sdkconfig silently retargets the build.
+# The line format must match exactly:  CONFIG_IDF_TARGET="<target>"
+# (no trailing comment, see IDF tools/cmake/targets.cmake __target_from_config)
+CONFIG_IDF_TARGET="esp32c3"
+
+
+# ----------------------------------------------------------------------------
+# TCP reporting target (main/Kconfig.projbuild, menu "Example Configuration")
+# ----------------------------------------------------------------------------
+CONFIG_EXAMPLE_IPV4=y
+# CONFIG_EXAMPLE_IPV6 is not set
+
+# IP address of the machine running the TCP server
+CONFIG_EXAMPLE_IPV4_ADDR="192.168.31.138"
+
+# Port the TCP server listens on
+CONFIG_EXAMPLE_PORT=1024
+
+# Take the IP from the values above, not from stdin
+CONFIG_EXAMPLE_SOCKET_IP_INPUT_STRING=y
+# CONFIG_EXAMPLE_SOCKET_IP_INPUT_STDIN is not set
+
+
+# ----------------------------------------------------------------------------
+# Network connection (menu "Example Connection Configuration")
+# ----------------------------------------------------------------------------
+CONFIG_EXAMPLE_CONNECT_WIFI=y
+# CONFIG_EXAMPLE_CONNECT_ETHERNET is not set
+# CONFIG_EXAMPLE_CONNECT_PPP is not set
+
+# WiFi SSID and password are intentionally absent from this file, because this
+# file is committed to git. After regenerating sdkconfig, run
+#     idf.py menuconfig
+# and fill in both values under "Example Connection Configuration":
+#     CONFIG_EXAMPLE_WIFI_SSID
+#     CONFIG_EXAMPLE_WIFI_PASSWORD
+# CONFIG_EXAMPLE_WIFI_SSID_PWD_FROM_STDIN is not set
+
+CONFIG_EXAMPLE_PROVIDE_WIFI_CONSOLE_CMD=y
+CONFIG_EXAMPLE_WIFI_CONN_MAX_RETRY=6
+
+# Scan method and RSSI threshold
+CONFIG_EXAMPLE_WIFI_SCAN_METHOD_ALL_CHANNEL=y
+CONFIG_EXAMPLE_WIFI_SCAN_RSSI_THRESHOLD=-127
+
+# Minimum auth mode accepted while scanning (keep permissive, or the AP may
+# not be found at all)
+CONFIG_EXAMPLE_WIFI_AUTH_OPEN=y
+
+# Prefer the strongest AP when several share the same SSID
+CONFIG_EXAMPLE_WIFI_CONNECT_AP_BY_SIGNAL=y

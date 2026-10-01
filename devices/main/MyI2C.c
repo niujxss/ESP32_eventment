@@ -3,6 +3,7 @@
 #include "freertos/task.h"
 #include "freertos/FreeRTOS.h"
 #include "sdkconfig.h"
+#include "esp_err.h"
 
 
 #define I2C_MASTER_SCL_IO           CONFIG_I2C_MASTER_SCL      /*!< GPIO number used for I2C master clock */
@@ -52,16 +53,46 @@ void my_read_id(uint8_t * buffer)
 }
 
 
-void my_read_data(uint8_t * buffer)
+esp_err_t my_read_data(uint8_t * buffer)
 {
     //写入指令
     uint8_t controlid = 0xFD;
-    i2c_master_write_to_device(I2C_NUMBER,I2C_DEVICE_ADDR,&controlid,1,I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+    esp_err_t err = i2c_master_write_to_device(I2C_NUMBER,I2C_DEVICE_ADDR,&controlid,1,I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+    if(err != ESP_OK)
+    {
+        return err;  // 测量命令没发出去，传感器不会重新测量，此时读回来的必然是旧数据
+    }
 
     //等待数据计算
     vTaskDelay(1000 / portTICK_PERIOD_MS);
     //读取数据
 
-    i2c_master_read_from_device(I2C_NUMBER,I2C_DEVICE_ADDR,buffer,6,I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+    return i2c_master_read_from_device(I2C_NUMBER,I2C_DEVICE_ADDR,buffer,6,I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
 
+}
+
+//SHT4x 软复位，命令 0x94，数据手册规定 1ms 内完成
+esp_err_t my_reset(void)
+{
+    uint8_t controlid = 0x94;
+    esp_err_t err = i2c_master_write_to_device(I2C_NUMBER,I2C_DEVICE_ADDR,&controlid,1,I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+    vTaskDelay(pdMS_TO_TICKS(10));
+    return err;
+}
+
+//SHT4x CRC-8：多项式 0x31，初值 0xFF，MSB first，不反转
+uint8_t my_crc8(const uint8_t * data, int len)
+{
+    uint8_t crc = 0xFF;
+    int i;
+    int b;
+    for(i = 0; i < len; i++)
+    {
+        crc ^= data[i];
+        for(b = 0; b < 8; b++)
+        {
+            crc = (crc & 0x80) ? (uint8_t)((crc << 1) ^ 0x31) : (uint8_t)(crc << 1);
+        }
+    }
+    return crc;
 }
