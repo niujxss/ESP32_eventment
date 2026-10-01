@@ -51,6 +51,16 @@ void vTaskled( void * pvParameters )
     }
 }
 
+// 软复位并让出1秒。打印复位结果，用来判断复位命令到底有没有被传感器 ACK：
+//   复位也失败 -> 传感器根本没应答，软复位这条路走不通，需要更硬的手段
+//   复位成功   -> 复位命令发出去了，下一步看它是否真的恢复了
+static void reset_and_wait(void)
+{
+    esp_err_t rerr = my_reset();
+    printf("  reset -> %s (0x%x)\n",esp_err_to_name(rerr),rerr);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+}
+
 void vTaskData( void * pvParameters )
 {
     uint8_t id_data[6];
@@ -73,9 +83,7 @@ void vTaskData( void * pvParameters )
         esp_err_t i2c_err = my_read_data(buffer);
         if(i2c_err != ESP_OK)
         {
-            printf("i2c read fail: %s (0x%x)\n",esp_err_to_name(i2c_err),i2c_err);
-            my_reset();                             // 主动软复位，不等它自己恢复
-            vTaskDelay(1000 / portTICK_PERIOD_MS);  // 原来的 continue 没有延时，会退化成1秒空转
+            reset_and_wait();   // 失败原因已由 my_read_data 按阶段打印
             continue;
         }
 
@@ -83,8 +91,7 @@ void vTaskData( void * pvParameters )
         if(my_crc8(buffer,2) != buffer[2] || my_crc8(buffer+3,2) != buffer[5])
         {
             printf("crc fail: raw=%02X%02X %02X%02X\n",buffer[0],buffer[1],buffer[3],buffer[4]);
-            my_reset();
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            reset_and_wait();
             continue;
         }
 

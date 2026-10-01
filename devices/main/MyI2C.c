@@ -4,6 +4,7 @@
 #include "freertos/FreeRTOS.h"
 #include "sdkconfig.h"
 #include "esp_err.h"
+#include <stdio.h>
 
 
 #define I2C_MASTER_SCL_IO           CONFIG_I2C_MASTER_SCL      /*!< GPIO number used for I2C master clock */
@@ -60,15 +61,23 @@ esp_err_t my_read_data(uint8_t * buffer)
     esp_err_t err = i2c_master_write_to_device(I2C_NUMBER,I2C_DEVICE_ADDR,&controlid,1,I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
     if(err != ESP_OK)
     {
-        return err;  // 测量命令没发出去，传感器不会重新测量，此时读回来的必然是旧数据
+        // 测量命令没发出去，传感器不会重新测量，此时读回来的必然是旧数据。
+        // 失败在写入阶段 = 传感器连自己的地址都没 ACK。
+        printf("  write 0xFD fail: %s (0x%x)\n",esp_err_to_name(err),err);
+        return err;
     }
 
     //等待数据计算
     vTaskDelay(1000 / portTICK_PERIOD_MS);
     //读取数据
 
-    return i2c_master_read_from_device(I2C_NUMBER,I2C_DEVICE_ADDR,buffer,6,I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
-
+    err = i2c_master_read_from_device(I2C_NUMBER,I2C_DEVICE_ADDR,buffer,6,I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+    if(err != ESP_OK)
+    {
+        // 命令收下了，但读数据这一步被 NACK
+        printf("  read 6 bytes fail: %s (0x%x)\n",esp_err_to_name(err),err);
+    }
+    return err;
 }
 
 //SHT4x 软复位，命令 0x94，数据手册规定 1ms 内完成
